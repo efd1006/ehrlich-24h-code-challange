@@ -20,7 +20,9 @@ export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
       },
       extra: {
         charset: 'utf8mb4_unicode_ci',
-        ssl: true
+        ssl: {
+          rejectUnauthorized: false
+        }
       },
       synchronize: false,
       logging: process.env.NODE_ENV == 'development' ? true : false,
@@ -43,7 +45,9 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   },
   extra: {
     charset: 'utf8mb4_unicode_ci',
-    ssl: true
+    ssl: {
+      rejectUnauthorized: false
+    }
   },
   synchronize: false,
   logging: process.env.NODE_ENV == 'development' ? true : false,
