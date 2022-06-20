@@ -6,6 +6,9 @@ import { AppService } from './app.service';
 import { typeOrmAsyncConfig } from './configs/typeorm.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { ImagesModule } from './modules/images/images.module';
+import { PexelsModule } from './shared/libs/pexels/pexels.module';
+import { CloudinaryModule } from './shared/libs/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -13,6 +16,9 @@ import { UserModule } from './modules/user/user.module';
     TypeOrmModule.forRootAsync(typeOrmAsyncConfig),
     AuthModule,
     UserModule,
+    ImagesModule,
+    PexelsModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
