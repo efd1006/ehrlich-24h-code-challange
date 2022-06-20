@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDTO, RegisterDTO } from './dto';
+import { LoginDTO, RegisterDTO, RequestPasswordResetDTO, ResetPasswordDTO } from './dto';
 
 @ApiTags("Authentication")
 @Controller('auth')
@@ -26,4 +26,18 @@ export class AuthController {
     return await this.authService.login(dto);
   }
 
+  @Post('request-password-reset')
+  async requestPasswordReset(
+    @Body() dto: RequestPasswordResetDTO
+  ) {
+    return await this.authService.requestPasswordReset(dto)
+  }
+
+  @Post('reset-password')
+  @UsePipes(new ValidationPipe())
+  async resetPassword(
+    @Body() dto: ResetPasswordDTO
+  ) {
+    return await this.authService.resetPassword(dto)
+  }
 }

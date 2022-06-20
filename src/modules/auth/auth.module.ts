@@ -7,10 +7,12 @@ import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import 'dotenv/config';
 import { JWTStrategy } from './strategies/jwt.strategy';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { ResetPasswordRequestEntity } from './entities/reset-password-request.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, ResetPasswordRequestEntity]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: {
@@ -18,6 +20,7 @@ import { JWTStrategy } from './strategies/jwt.strategy';
       }
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    MailerModule
   ],
   controllers: [AuthController],
   providers: [AuthService, JWTStrategy],
