@@ -5,7 +5,7 @@ import { CloudinaryService } from '../../shared/libs/cloudinary/cloudinary.servi
 import { PexelsService } from '../../shared/libs/pexels/pexels.service';
 import { UserRole } from '../user/enums';
 import { UserEntity } from '../user/user.entity';
-import { CreateImageDTO } from './dto';
+import { CreateImageDTO, UpdateImageDTO } from './dto';
 import { ImageEntity } from './image.entity';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class ImagesService {
   async requestImages(limit: number, user: UserEntity) {
     const pexelData = await this.pexelService.getRandomImages(limit)
     const cloudinaryResult = await this.cloudinaryService.uploadToCloudinary(pexelData)
-    // return cloudinaryResult
+
 
     let datas: CreateImageDTO[] = []
     let dataToReturn = []
@@ -50,10 +50,10 @@ export class ImagesService {
 
   async getImageByID(id: number, user: UserEntity) {
 
-    // check if user role is admin or user for specific query
-    let q = (user.role == UserRole.USER) ? { id: id, owner_id: user.id } : { id: id } 
+    // check if user role is admin or user for specific query since there are only two roles we can use this approach for simplicity and fast development
+    let q = (user.role == UserRole.USER) ? { id: id, owner_id: user.id } : { id: id }
 
-    let image = await this.imageRepository.findOne({ where: q })
+    let image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q })
 
     if (!image) {
       throw new HttpException("Image not found", HttpStatus.NOT_FOUND)
@@ -63,9 +63,29 @@ export class ImagesService {
     await this.imageRepository.update({ id: image.id }, { hits: image.hits + 1 })
 
     // query again to get the updated data
-    image = await this.imageRepository.findOne({ where: q })
+    image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q })
+
+    return image
+  }
+
+  async updateImageById(id: number, dto: UpdateImageDTO, user: UserEntity) {
+    // check if user role is admin or user for specific query since there are only two roles we can use this approach for simplicity and fast development
+    let q = (user.role == UserRole.USER) ? { id: id, owner_id: user.id } : { id: id }
+
+    let image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q })
+
+    if (!image) {
+      throw new HttpException("Image not found", HttpStatus.NOT_FOUND)
+    }
+
+    // increment hits property by one before returning
+    await this.imageRepository.update({ id: image.id }, { hits: image.hits + 1, uri: dto.uri })
+
+    // query again to get the updated data
+    image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q })
 
     return image
 
   }
+
 }
