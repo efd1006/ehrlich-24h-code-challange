@@ -1,11 +1,15 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../auth/decorators/role.decorator';
 import { User } from '../auth/decorators/user.decorator';
+import { UserRole } from '../user/enums';
 import { UserEntity } from '../user/user.entity';
 import { ImagesService } from './images.service';
 
 @ApiTags('Images')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @Controller('images')
 export class ImagesController {
 
@@ -14,11 +18,9 @@ export class ImagesController {
   ) {}
 
   @Get()
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @ApiQuery({
 		name: "limit",
-		description: "The maximum number of transactions to return",
+		description: "The maximum number of image to be requested (max: 10)",
 		required: false,
 		type: Number
 	})
@@ -34,4 +36,14 @@ export class ImagesController {
     }
     return await this.imagesService.requestImages(q, user)
   }
+
+  @Get(':id')
+  @Roles(UserRole.USER, UserRole.ADMIN)
+  async getImageById(
+    @Param('id') imageID: number,
+    @User() user: UserEntity
+  ) {
+    return await this.imagesService.getImageByID(imageID, user)
+  }
+
 }
