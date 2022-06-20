@@ -5,10 +5,11 @@ import { PexelsModule } from '../../shared/libs/pexels/pexels.module';
 import { CloudinaryModule } from '../../shared/libs/cloudinary/cloudinary.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ImageEntity } from './image.entity';
+import { UserEntity } from '../user/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ImageEntity]),
+    TypeOrmModule.forFeature([ImageEntity, UserEntity]),
     PexelsModule,
     CloudinaryModule
   ],

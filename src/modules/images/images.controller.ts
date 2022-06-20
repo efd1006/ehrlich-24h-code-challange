@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/role.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { UserRole } from '../user/enums';
 import { UserEntity } from '../user/user.entity';
-import { UpdateImageDTO } from './dto';
+import { CreateImageDTO, UpdateImageDTO } from './dto';
 import { ImagesService } from './images.service';
 
 @ApiTags('Images')
@@ -53,8 +53,17 @@ export class ImagesController {
     @Param('id') imageID: number,
     @Body() dto: UpdateImageDTO,
     @User() user: UserEntity
-  ) { 
+  ) {
     return await this.imagesService.updateImageById(imageID, dto, user)
+  }
+
+  @Post()
+  @Roles(UserRole.USER, UserRole.ADMIN)
+  async createImage(
+    @Body() dto: CreateImageDTO,
+    @User() user: UserEntity
+  ) {
+    return await this.imagesService.createImage(dto, user)
   }
 
 }

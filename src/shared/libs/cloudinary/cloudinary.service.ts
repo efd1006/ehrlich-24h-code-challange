@@ -13,21 +13,22 @@ export class CloudinaryService {
 		})
 	}
 
-	async uploadToCloudinary(pexelData: IPexelCuratedImageResponse): Promise<ICloudinaryResponse[]> {
+	async uploadMulti(pexelData: IPexelCuratedImageResponse): Promise<ICloudinaryResponse[]> {
 		let results: ICloudinaryResponse[] = []
 		for (let i = 0; i < pexelData.photos.length; i++) {
-			let result = await this.uploadImage(pexelData.photos[i].src.small)
+			let result = await this.uploadSingle(pexelData.photos[i].src.small)
 			results.push(result)
 		}
 		return results;
 	}
 
-	async uploadImage(url: string): Promise<ICloudinaryResponse> {
+	async uploadSingle(url: string): Promise<ICloudinaryResponse> {
 		return new Promise((resolve, reject) => {
 			cloudinary.uploader.upload(url, function (error, result: ICloudinaryResponse) {
-				if (result) {
-					return resolve(result)
+				if (error) {
+					reject(error)
 				}
+				return resolve(result)
 			});
 		})
 	}
