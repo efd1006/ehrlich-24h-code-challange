@@ -19,6 +19,7 @@ export class AuthController {
   @Post('login')
   @UsePipes(new ValidationPipe())
   @ApiOperation({ summary: "Login user" })
+  @ApiResponse({ status: 201, description: "Returns the user and access token." })
   async login(
     @Body() dto: LoginDTO
   ) {
