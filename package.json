@@ -28,7 +28,8 @@
     "seed:class": "npm run seed:run -- -s",
     "seed:run": "ts-node ./node_modules/typeorm-seeding/dist/cli.js seed -n src/configs/typeorm-migration.config.ts",
     "schema:drop": "npm run typeorm:cli schema:drop",
-    "db:setup": "npm run build && npm run typeorm:cli schema:drop && npm run migration:run && npm run seed:run"
+    "db:setup": "npm run build && npm run typeorm:cli schema:drop && npm run migration:run && npm run seed:run",
+    "heroku-postbuild": "npm run db:setup"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.7.1",
