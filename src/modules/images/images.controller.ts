@@ -1,5 +1,8 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { User } from '../auth/decorators/user.decorator';
+import { UserEntity } from '../user/user.entity';
 import { ImagesService } from './images.service';
 
 @ApiTags('Images')
@@ -11,6 +14,8 @@ export class ImagesController {
   ) {}
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @ApiQuery({
 		name: "limit",
 		description: "The maximum number of transactions to return",
@@ -18,7 +23,8 @@ export class ImagesController {
 		type: Number
 	})
   async getImages(
-    @Query('limit') limit: number = 5
+    @Query('limit') limit: number = 5,
+    @User() user: UserEntity
   ) {
     // hard defaults to 5
     let q = limit <= 5 ? 5 : limit
@@ -26,6 +32,6 @@ export class ImagesController {
     if(q >= 10) {
       q = 10
     }
-    return await this.imagesService.requestImages(q)
+    return await this.imagesService.requestImages(q, user)
   }
 }
