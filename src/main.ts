@@ -8,7 +8,7 @@ async function bootstrap() {
 
   app.enableCors()
   app.setGlobalPrefix('api');
-  
+
   if (process.env.NODE_ENV == 'development') {
     const swaggerOptions = new DocumentBuilder()
       .setTitle('Ehrlich 24h Code Challange API')
@@ -22,7 +22,10 @@ async function bootstrap() {
     });
     SwaggerModule.setup('api/docs', app, document);
   }
-  
-  await app.listen(process.env.APP_PORT || 3001, '0.0.0.0');
+
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}.`);
+  });
 }
 bootstrap();
