@@ -54,7 +54,7 @@ export class ImagesService {
     // check if user role is admin or user for specific query since there are only two roles we can use this approach for simplicity and fast development
     let q = (user.role == UserRole.USER) ? { id: id, owner_id: user.id } : { id: id }
 
-    let image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q })
+    let image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q, withDeleted: user.role == UserRole.ADMIN ? true : false })
 
     if (!image) {
       throw new HttpException("Image not found", HttpStatus.NOT_FOUND)
@@ -64,7 +64,7 @@ export class ImagesService {
     await this.imageRepository.update({ id: image.id }, { hits: image.hits + 1 })
 
     // query again to get the updated data
-    image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q })
+    image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q, withDeleted: user.role == UserRole.ADMIN ? true : false })
 
     return image
   }
@@ -73,7 +73,7 @@ export class ImagesService {
     // check if user role is admin or user for specific query since there are only two roles we can use this approach for simplicity and fast development
     let q = (user.role == UserRole.USER) ? { id: id, owner_id: user.id } : { id: id }
 
-    let image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q })
+    let image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q, withDeleted: user.role == UserRole.ADMIN ? true : false })
 
     if (!image) {
       throw new HttpException("Image not found", HttpStatus.NOT_FOUND)
@@ -83,7 +83,7 @@ export class ImagesService {
     await this.imageRepository.update({ id: image.id }, { hits: image.hits + 1, uri: dto.uri })
 
     // query again to get the updated data
-    image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q })
+    image = await this.imageRepository.findOne({ select: ['id', 'hits', 'uri'], where: q, withDeleted: user.role == UserRole.ADMIN ? true : false })
 
     return image
 
@@ -99,7 +99,7 @@ export class ImagesService {
     let owner_id: string
     if (user.role == UserRole.ADMIN) {
       if (dto.owner_id) {
-        const owner = await this.userRepository.findOne({ where: { id: dto.owner_id } }).catch(e => {throw new HttpException("Owner not found", HttpStatus.NOT_FOUND)}) // we need to catch the error is somebody passed invalid uuid, could be handled in a better way
+        const owner = await this.userRepository.findOne({ where: { id: dto.owner_id } }).catch(e => { throw new HttpException("Owner not found", HttpStatus.NOT_FOUND) }) // we need to catch the error is somebody passed invalid uuid, could be handled in a better way
         if (!owner) {
           throw new HttpException("Owner not found", HttpStatus.NOT_FOUND)
         }
@@ -116,7 +116,7 @@ export class ImagesService {
     let cloudinaryResult
     try {
       cloudinaryResult = await this.cloudinaryService.uploadSingle(dto.uri)
-    }catch(e) {
+    } catch (e) {
       console.log(e)
       throw new HttpException(e.message, Number(e.http_code))
     }
@@ -133,6 +133,24 @@ export class ImagesService {
     await this.imageRepository.save(result)
 
     return result
+  }
+
+  async softDeleteImage(id: number, user: UserEntity) {
+    // check if user role is admin or user for specific query since there are only two roles we can use this approach for simplicity and fast development
+    let q = (user.role == UserRole.USER) ? { id: id, owner_id: user.id } : { id: id }
+
+    let image = await this.imageRepository.findOne({ where: q })
+
+    if(!image) {
+      throw new HttpException("Image not found", HttpStatus.NOT_FOUND)
+    }
+
+    const res = await this.imageRepository.softDelete(image.id)
+    if (!res.affected) {
+      throw new HttpException("Image not found", HttpStatus.NOT_FOUND)
+    }
+
+    return { deleted: true }
   }
 
 }

@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/role.decorator';
 import { User } from '../auth/decorators/user.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from '../user/enums';
 import { UserEntity } from '../user/user.entity';
 import { CreateImageDTO, UpdateImageDTO } from './dto';
@@ -39,6 +40,7 @@ export class ImagesController {
   }
 
   @Get(':id')
+  @UseGuards(RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
   async getImageById(
     @Param('id') imageID: number,
@@ -48,6 +50,7 @@ export class ImagesController {
   }
 
   @Patch(':id')
+  @UseGuards(RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
   async updateImageById(
     @Param('id') imageID: number,
@@ -58,6 +61,7 @@ export class ImagesController {
   }
 
   @Post()
+  @UseGuards(RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
   async createImage(
     @Body() dto: CreateImageDTO,
@@ -65,5 +69,16 @@ export class ImagesController {
   ) {
     return await this.imagesService.createImage(dto, user)
   }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.USER, UserRole.ADMIN)
+  async softDeleteImage(
+    @Param('id') imageID: number,
+    @User() user: UserEntity 
+  ) {
+    return await this.imagesService.softDeleteImage(imageID, user)
+  }
+
 
 }
